@@ -1,10 +1,12 @@
+const path = require('path');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Internship = require('./models/Internship');
 const { sampleInternships } = require('./controllers/internshipController');
 
-// Load environment variables
-dotenv.config();
+// Load environment variables reliably from backend/.env and root .env
+dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const seedData = async () => {
     try {
@@ -30,4 +32,3 @@ const seedData = async () => {
 };
 
 seedData();
-
