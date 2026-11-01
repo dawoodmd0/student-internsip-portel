@@ -1,28 +1,47 @@
-FROM node:22-alpine AS client-builder
+# ==========================================
+# Multi-Stage Production Dockerfile
+# Stage 1: Build the React Frontend
+# ==========================================
+FROM node:22-alpine AS frontend-builder
 
-WORKDIR /app/client
+WORKDIR /app/frontend
 
-COPY client/package*.json ./
+# Copy frontend dependency manifests
+COPY frontend/package*.json ./
 
+# Install dependencies using clean install
 RUN npm ci
 
-COPY client/ ./
-
+# Copy frontend sources and compile production bundle
+COPY frontend/ ./
 RUN npm run build
 
-# Stage 2
+# ==========================================
+# Stage 2: Production Backend Server
+# ==========================================
 FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+ENV NODE_ENV=production
 
-COPY . .
-RUN rm -rf node_modules client
+# Copy backend manifests
+COPY backend/package*.json ./
 
-RUN npm ci --only=production
+# Install production dependencies only
+RUN npm ci --omit=dev
 
-COPY --from=client-builder /app/client/dist ./client/dist
+# Copy backend source code
+COPY backend/ ./
 
-CMD ["node", "index.js"]
+# Copy compiled frontend from Stage 1 into backend public/dist folder
+COPY --from=frontend-builder /app/frontend/dist ./public
+
+# Expose backend server port
+EXPOSE 5000
+
+# Run with non-root node user for container security
+USER node
+
+CMD ["node", "server.js"]
 

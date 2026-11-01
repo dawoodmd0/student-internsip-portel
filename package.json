@@ -1,26 +1,26 @@
 {
-  "name": "mern",
+  "name": "student-internship-portal",
   "version": "1.0.0",
-  "description": "NodeJS + Express + React + MongoDB",
-  "main": "index.js",
+  "description": "Full Stack Student Internship Portal built with React.js, Node.js, Express.js, and MongoDB",
   "scripts": {
-    "start": "node index.js",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "client": "cd client && npm run dev",
-    "server": "nodemon index.js",
-    "setup": "npm install && cd client && npm install && cd ..",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "npm --prefix backend run dev",
+    "frontend": "npm --prefix frontend run dev",
+    "seed": "npm --prefix backend run seed",
+    "install:all": "npm install && npm --prefix backend install && npm --prefix frontend install",
+    "build:frontend": "npm --prefix frontend run build"
   },
-  "keywords": [],
+  "keywords": [
+    "student-internship-portal",
+    "react",
+    "nodejs",
+    "express",
+    "mongodb",
+    "mongoose"
+  ],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "mongoose": "^8.0.3"
-  },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "nodemon": "^3.0.2"
+    "concurrently": "^8.2.2"
   }
 }
