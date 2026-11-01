@@ -1,6 +1,25 @@
 const mongoose = require('mongoose');
 
 /**
+ * Automatically insert default internship positions if the collection is empty
+ */
+const initDefaultInternships = async () => {
+    try {
+        const Internship = require('../models/Internship');
+        const { sampleInternships } = require('../controllers/internshipController');
+
+        const count = await Internship.countDocuments();
+        if (count === 0) {
+            console.log('🌱 No internship records found. Automatically populating default internship data...');
+            const inserted = await Internship.insertMany(sampleInternships);
+            console.log(`✅ ${inserted.length} default internships populated automatically.`);
+        }
+    } catch (err) {
+        console.warn('⚠️ Note: Could not auto-initialize default internships:', err.message);
+    }
+};
+
+/**
  * Connect to MongoDB using connection string from environment variable
  */
 const connectDB = async () => {
@@ -16,9 +35,11 @@ const connectDB = async () => {
         const conn = await mongoose.connect(mongoUri);
 
         console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+
+        // Automatically populate default data if database is fresh
+        await initDefaultInternships();
     } catch (error) {
         console.error(`❌ MongoDB Connection Error: ${error.message}`);
-        // Do not crash the entire process so that health endpoints can still report status
     }
 };
 
@@ -31,4 +52,3 @@ mongoose.connection.on('reconnected', () => {
 });
 
 module.exports = connectDB;
-

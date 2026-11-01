@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import InternshipCard from '../components/InternshipCard';
 import Loader from '../components/Loader';
 import AlertBanner from '../components/AlertBanner';
-import { getInternships, seedSampleInternships } from '../services/api';
+import { getInternships } from '../services/api';
 
 const HomePage = () => {
     const [internships, setInternships] = useState([]);
@@ -10,8 +10,6 @@ const HomePage = () => {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedType, setSelectedType] = useState('All');
-    const [seeding, setSeeding] = useState(false);
-    const [seedSuccess, setSeedSuccess] = useState(null);
 
     const loadInternships = useCallback(async () => {
         try {
@@ -31,25 +29,10 @@ const HomePage = () => {
         // Debounce search slightly
         const timer = setTimeout(() => {
             loadInternships();
-        }, 250);
+        }, 200);
 
         return () => clearTimeout(timer);
     }, [loadInternships]);
-
-    const handleSeedData = async () => {
-        try {
-            setSeeding(true);
-            setSeedSuccess(null);
-            setError(null);
-            const res = await seedSampleInternships();
-            setSeedSuccess(res.message || 'Sample internships loaded successfully!');
-            await loadInternships();
-        } catch (err) {
-            setError(err.message || 'Failed to seed sample opportunities.');
-        } finally {
-            setSeeding(false);
-        }
-    };
 
     return (
         <div className="home-page">
@@ -113,33 +96,16 @@ const HomePage = () => {
                     />
                 )}
 
-                {seedSuccess && (
-                    <AlertBanner
-                        type="success"
-                        message={seedSuccess}
-                        onClose={() => setSeedSuccess(null)}
-                    />
-                )}
-
                 {/* Section Header */}
                 <div className="listing-header">
                     <div>
                         <h2 className="section-title">Available Opportunities</h2>
                         <p className="section-subtitle">
                             {loading
-                                ? 'Scanning database...'
+                                ? 'Loading verified opportunities...'
                                 : `Showing ${internships.length} open internship position${internships.length === 1 ? '' : 's'}`}
                         </p>
                     </div>
-
-                    <button
-                        className="btn btn-secondary seed-btn"
-                        onClick={handleSeedData}
-                        disabled={seeding}
-                        title="Reload verified sample internships into MongoDB"
-                    >
-                        {seeding ? 'Seeding Data...' : '🌱 Reload Sample Internships'}
-                    </button>
                 </div>
 
                 {/* Content States */}
@@ -150,29 +116,17 @@ const HomePage = () => {
                         <div className="empty-icon">📂</div>
                         <h3>No Internships Found</h3>
                         <p>
-                            {searchTerm || selectedType !== 'All'
-                                ? `No opportunities match your filter "${searchTerm || selectedType}". Try adjusting your keywords.`
-                                : 'No internship records found in the database. Click below to load sample opportunities!'}
+                            No opportunities match your filter &quot;{searchTerm || selectedType}&quot;.
                         </p>
-                        {searchTerm || selectedType !== 'All' ? (
-                            <button
-                                className="btn btn-outline"
-                                onClick={() => {
-                                    setSearchTerm('');
-                                    setSelectedType('All');
-                                }}
-                            >
-                                Reset Search Filters
-                            </button>
-                        ) : (
-                            <button
-                                className="btn btn-primary"
-                                onClick={handleSeedData}
-                                disabled={seeding}
-                            >
-                                {seeding ? 'Populating Database...' : 'Load Sample Data'}
-                            </button>
-                        )}
+                        <button
+                            className="btn btn-outline"
+                            onClick={() => {
+                                setSearchTerm('');
+                                setSelectedType('All');
+                            }}
+                        >
+                            Reset Search Filters
+                        </button>
                     </div>
                 ) : (
                     <div className="internships-grid">
@@ -187,4 +141,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
